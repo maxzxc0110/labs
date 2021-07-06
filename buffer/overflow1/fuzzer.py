@@ -2,7 +2,7 @@
 
 import socket, time, sys
 
-ip = "10.10.86.181"
+ip = "10.10.61.138"
 
 port = 1337
 timeout = 5
